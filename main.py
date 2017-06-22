@@ -14,6 +14,7 @@ from __future__ import print_function, division
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import torch.backends.cudnn as cudnn
 import numpy as np
 import config as cf
 import torchvision
@@ -201,6 +202,8 @@ if(args.finetune):
 
 if use_gpu:
     model_ft = model_ft.cuda()
+    model_ft = torch.nn.DataParallel(model_ft, device_ids=range(torch.cuda.device_count()))
+    cudnn.benchmark = True
 
 if __name__ == "__main__":
     criterion = nn.CrossEntropyLoss()
