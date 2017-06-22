@@ -9,7 +9,7 @@ aug_base = '/home/bumsoo/Data/_'+name
 batch_size = 16
 num_epochs = 50
 lr_decay_epoch=10
-feature_size = 200
+feature_size = 100
 
 # data option
 mean = [0.456, 0.456, 0.456]

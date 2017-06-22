@@ -162,17 +162,6 @@ class ResNet(nn.Module):
 
         return x
 
-class MyResNet(nn.Module):
-    def __init__(self, pretrained_model, feature_size, num_class):
-        super(MyResNet, self).__init__()
-        self.pretrained_model = pretrained_model
-        self.bn = nn.BatchNorm2d(feature_size)
-        self.relu = nn.ReLU(inplace=True)
-        self.last_layer = nn.Linear(feature_size, num_class)
-
-    def forward(self, x):
-        return self.last_layer(self.pretrained_model(x))
-
 def resnet(pretrained=False, depth=18, **kwargs):
     """Constructs ResNet models for various depths
     Args:
