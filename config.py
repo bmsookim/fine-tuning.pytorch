@@ -1,9 +1,10 @@
 # Configuration File
 
 # Base directory for data formats
-name = 'GURO_FPTP'
+name = 'GURO_ALL'
 data_base = '/home/mnt/datasets/'+name
-aug_base = '/home/bumsoo/Data/_'+name
+aug_base = '/home/bumsoo/Data/split/'+name
+test_dir = '/home/bumsoo/Data/test/INBREAST'
 
 # model option
 batch_size = 16

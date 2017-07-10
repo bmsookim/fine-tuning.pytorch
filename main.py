@@ -29,7 +29,7 @@ from networks import *
 from torch.autograd import Variable
 
 parser = argparse.ArgumentParser(description='PyTorch Digital Mammography Training')
-parser.add_argument('--lr', default=1e-3, type=float, help='learning_rate')
+parser.add_argument('--lr', default=1e-2, type=float, help='learning_rate')
 parser.add_argument('--net_type', default='resnet', type=str, help='model')
 parser.add_argument('--depth', default=50, type=int, help='depth of model')
 parser.add_argument('--finetune', '-f', action='store_true', help='Fine tune pretrained model')
@@ -48,7 +48,7 @@ data_transforms = {
         transforms.Normalize(cf.mean, cf.std)
     ]),
     'val': transforms.Compose([
-        transforms.Scale(256),
+        transforms.Scale(224),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize(cf.mean, cf.std)
@@ -56,6 +56,7 @@ data_transforms = {
 }
 
 data_dir = cf.aug_base
+dataset_dir = cf.data_base.split("/")[-1] + os.sep
 print("| Preparing %s dataset..." %(cf.data_base.split("/")[-1]))
 dsets = {
     x : datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x])
@@ -87,8 +88,58 @@ def getNetwork(args):
 
     return net, file_name
 
+def softmax(x):
+    return np.exp(x) / np.sum(np.exp(x), axis=0)
+
+# Test only option
+if (args.testOnly):
+    print("| Loading checkpoint model for test phase...")
+    assert os.path.isdir('checkpoint'), 'Error: No checkpoint directory found!'
+    _, file_name = getNetwork(args)
+    checkpoint = torch.load('./checkpoint/'+file_name+'.t7')
+    model = checkpoint['model']
+
+    if use_gpu:
+        model.cuda()
+        # model = torch.nn.DataParallel(model, device_ids=range(torch.cuda.device_count()))
+        # cudnn.benchmark = True
+
+    model.eval()
+    test_loss = 0
+    correct = 0
+    total = 0
+
+    testsets = datasets.ImageFolder(cf.test_dir, data_transforms['val'])
+
+    testloader = torch.utils.data.DataLoader(
+        testsets,
+        batch_size = 1,
+        shuffle = False,
+        num_workers=1
+    )
+
+    for batch_idx, (inputs, targets) in enumerate(testloader):#dset_loaders['val']):
+        if use_gpu:
+            inputs, targets = inputs.cuda(), targets.cuda()
+        inputs, targets = Variable(inputs, volatile=True), Variable(targets)
+        outputs = model(inputs)
+
+        # print(outputs.data.cpu().numpy()[0])
+        softmax_res = softmax(outputs.data.cpu().numpy()[0])
+        print(softmax_res[1])
+
+        _, predicted = torch.max(outputs.data, 1)
+        total += targets.size(0)
+        correct += predicted.eq(targets.data).cpu().sum()
+
+    acc = 100.*correct/total
+    print("| Test Result\tAcc@1 %.2f%%" %(acc))
+
+    sys.exit(0)
+
 # Training model
 def train_model(model, criterion, optimizer, lr_scheduler, num_epochs=cf.num_epochs):
+    global dataset_dir
     since = time.time()
 
     best_model, best_acc = model, 0.0
@@ -158,7 +209,7 @@ def train_model(model, criterion, optimizer, lr_scheduler, num_epochs=cf.num_epo
                     }
                     if not os.path.isdir('checkpoint'):
                         os.mkdir('checkpoint')
-                    save_point = './checkpoint/'
+                    save_point = './checkpoint/'+dataset_dir
                     if not os.path.isdir(save_point):
                         os.mkdir(save_point)
                     torch.save(state, save_point+file_name+'.t7')

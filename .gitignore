@@ -102,3 +102,4 @@ ENV/
 
 # torch
 *.t7
+vectors/*

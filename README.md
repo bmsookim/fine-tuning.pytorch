@@ -50,6 +50,9 @@ Organizing codes for your data into the given requirements will be provided [her
 
 ## How to run
 After you have cloned the repository, you can train the dataset by running the script below.
+
+You can set the dimension of the additional layer in [config.py](./config.py)
+
 ```bash
 # zero-base training
 python main --lr [:lr] --depth [:depth]
@@ -62,5 +65,33 @@ python main --finetune --addlayer --lr [:lr] --depth [:depth]
 ```
 
 The code above will automatically download weights from the given depth data, and train your dataset with a very small learning rate.
+
+## Feature extraction
+For various training mechanisms, extracted feature vectors are needed.
+
+This repository will provide you not only feature extraction from pre-trained networks,
+
+but also extractions from a model that was trained by yourself.
+
+Just set the test directory in the [config.py](config.py) and run the code below.
+
+```bash
+python extract_features.py
+```
+
+This will automatically create pickles in a newly created 'vector' directory,
+
+which will contain dictionary pickles which contains the below.
+
+Currently, the 'score' will only cover 0~1 scores for binary classes.
+
+Confidence scores for multiple class will be updated afterwards.
+
+```bash
+pickle_file [name : image base name]
+    |- 'file_name' : file name of the test image
+    |- 'features'  : extracted feature vector
+    |- 'score'     : Score for binary classification
+```
 
 Enjoy :-)
