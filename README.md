@@ -1,5 +1,5 @@
-# ResNet Fine-Tuning
-Pytorch implementation of Fine-Tuning (Transfer Learning) Residual Networks.
+# Fine-Tuning
+Pytorch implementation of Fine-Tuning (Transfer Learning) CNN Networks.
 
 ![alt_tag](./imgs/transfer-learning.jpeg)
 
@@ -13,7 +13,7 @@ See the [installation instruction](INSTALL.md) for a step-by-step installation g
 See the [server instruction](SERVER.md) for server settup.
 - Install [cuda-8.0](https://developer.nvidia.com/cuda-downloads)
 - Install [cudnn v5.1](https://developer.nvidia.com/cudnn)
-- Download [Pytorch 2.7](https://pytorch.org) and clone the repository.
+- Download [Pytorch for python-2.7](https://pytorch.org) and clone the repository.
 ```bash
 pip install http://download.pytorch.org/whl/cu80/torch-0.1.12.post2-cp27-none-linux_x86_64.whl
 pip install torchvision
@@ -53,15 +53,33 @@ After you have cloned the repository, you can train the dataset by running the s
 
 You can set the dimension of the additional layer in [config.py](./config.py)
 
+The resetClassifier option will automatically detect the number of classes in your data folder and reset the last classifier layer to the according number.
+
 ```bash
 # zero-base training
-python main --lr [:lr] --depth [:depth]
+python main.py --lr [:lr] --depth [:depth] --resetClassifier
 
 # fine-tuning
-python main --finetune --lr [:lr] --depth [:depth]
+python main.py --finetune --lr [:lr] --depth [:depth]
 
 # fine-tuning with additional linear layers
-python main --finetune --addlayer --lr [:lr] --depth [:depth]
+python main.py --finetune --addlayer --lr [:lr] --depth [:depth]
+```
+
+## Run various networks
+
+I have added fine-tuning & transfer learning script for alexnet, VGG(11, 13, 16, 19),
+ResNet(18, 34, 50, 101, 152).
+
+Please modify the [scripts](./scripts) and run the line below.
+
+```bash
+
+$ ./scripts/[:network].sh 
+
+# For example, if you want to pretrain alexnet, just run
+$ ./scripts/alexnet.sh
+
 ```
 
 The code above will automatically download weights from the given depth data, and train your dataset with a very small learning rate.

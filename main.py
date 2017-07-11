@@ -29,11 +29,12 @@ from networks import *
 from torch.autograd import Variable
 
 parser = argparse.ArgumentParser(description='PyTorch Digital Mammography Training')
-parser.add_argument('--lr', default=1e-2, type=float, help='learning_rate')
+parser.add_argument('--lr', default=1e-3, type=float, help='learning_rate')
 parser.add_argument('--net_type', default='resnet', type=str, help='model')
 parser.add_argument('--depth', default=50, type=int, help='depth of model')
 parser.add_argument('--finetune', '-f', action='store_true', help='Fine tune pretrained model')
 parser.add_argument('--addlayer','-a',action='store_true', help='Add additional layer in fine-tuning')
+parser.add_argument('--resetClassifier', '-r', action='store_true', help='Reset classifier')
 parser.add_argument('--testOnly', '-t', action='store_true', help='Test mode with the saved model')
 args = parser.parse_args()
 
@@ -76,14 +77,27 @@ use_gpu = torch.cuda.is_available()
 print('\n[Phase 2] : Model setup')
 
 def getNetwork(args):
-    if (args.net_type == 'vggnet'):
-        net = VGG(args.finetune, args.depth)
+    if (args.net_type == 'alexnet'):
+        net = models.alexnet(pretrained=args.finetune)
+        file_name = 'alexnet'
+    elif (args.net_type == 'vggnet'):
+        if(args.depth == 11):
+            net = models.vgg11(pretrained=args.finetune)
+        elif(args.depth == 13):
+            net = models.vgg13(pretrained=args.finetune)
+        elif(args.depth == 16):
+            net = models.vgg16(pretrained=args.finetune)
+        elif(args.depth == 19):
+            net = models.vgg19(pretrained=args.finetune)
+        else:
+            print('Error : VGGnet should have depth of either [11, 13, 16, 19]')
+            sys.exit(1)
         file_name = 'vgg-%s' %(args.depth)
     elif (args.net_type == 'resnet'):
         net = resnet(args.finetune, args.depth)
         file_name = 'resnet-%s' %(args.depth)
     else:
-        print('Error : Network should be either [VGGNet / ResNet]')
+        print('Error : Network should be either [alexnet / vggnet / resnet]')
         sys.exit(1)
 
     return net, file_name
@@ -185,7 +199,7 @@ def train_model(model, criterion, optimizer, lr_scheduler, num_epochs=cf.num_epo
 
                 if (phase == 'train'):
                     sys.stdout.write('\r')
-                    sys.stdout.write('| Epoch [%2d/%2d] Iter[%3d/%3d]\t\tLoss %.4f\tAcc %.2f%%'
+                    sys.stdout.write('| Epoch [%2d/%2d] Iter [%3d/%3d]\t\tLoss %.4f\tAcc %.2f%%'
                             %(epoch+1, num_epochs, batch_idx+1,
                                 (len(dsets[phase])//cf.batch_size)+1, loss.data[0], 100.*running_corrects/tot))
                     sys.stdout.flush()
@@ -240,21 +254,31 @@ class MyResNet(nn.Module):
         return self.last_layer(self.pretrained_model(x))
 
 model_ft, file_name = getNetwork(args)
-if(args.finetune):
-    print('| Fine-tuning pre-trained networks...')
+
+if(args.resetClassifier):
+    print('| Reset final classifier...')
     if(args.addlayer):
         print('| Add features of size %d' %cf.feature_size)
         num_ftrs = model_ft.fc.in_features
-        model_ft.fc = nn.Linear(num_ftrs, len(dset_classes))
-    else:
-        num_ftrs = model_ft.fc.in_features
         model_ft.fc = nn.Linear(num_ftrs, cf.feature_size)
         model_ft = MyResNet(model_ft)
+    else:
+        if(args.net_type == 'alexnet' or args.net_type == 'vggnet'):
+            num_ftrs = model_ft.classifier[6].in_features
+            feature_model = list(model_ft.classifier.children())
+            feature_model.pop()
+            feature_model.append(nn.Linear(num_ftrs, len(dset_classes)))
+            model_ft.classifier = nn.Sequential(*feature_model)
+        elif(args.net_type == 'resnet'):
+            num_ftrs = model_ft.fc.in_features
+            model_ft.fc = nn.Linear(num_ftrs, len(dset_classes))
 
 if use_gpu:
     model_ft = model_ft.cuda()
     model_ft = torch.nn.DataParallel(model_ft, device_ids=range(torch.cuda.device_count()))
     cudnn.benchmark = True
+
+print(model_ft)
 
 if __name__ == "__main__":
     criterion = nn.CrossEntropyLoss()
