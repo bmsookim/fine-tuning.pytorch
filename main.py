@@ -242,17 +242,6 @@ def exp_lr_scheduler(optimizer, epoch, init_lr=args.lr, lr_decay_epoch=10):
 
     return optimizer, lr
 
-class MyResNet(nn.Module):
-    def __init__(self, pretrained_model):
-        super(MyResNet, self).__init__()
-        self.pretrained_model = pretrained_model
-        self.bn = nn.BatchNorm2d(cf.feature_size)
-        self.relu = nn.ReLU(inplace=True)
-        self.last_layer = nn.Linear(cf.feature_size, len(dset_classes))
-
-    def forward(self, x):
-        return self.last_layer(self.pretrained_model(x))
-
 model_ft, file_name = getNetwork(args)
 
 if(args.resetClassifier):
@@ -260,8 +249,12 @@ if(args.resetClassifier):
     if(args.addlayer):
         print('| Add features of size %d' %cf.feature_size)
         num_ftrs = model_ft.fc.in_features
-        model_ft.fc = nn.Linear(num_ftrs, cf.feature_size)
-        model_ft = MyResNet(model_ft)
+        feature_model = list(model_ft.fc.children())
+        feature_model.append(nn.Linear(num_ftrs, cf.feature_size))
+        feature_model.append(nn.BatchNormd1d(cf.feature_size))
+        feature_model.append(nn.ReLU(inplace=True))
+        feature_model.append(nn.Linear(cf.feature_size, len(dset_classes)))
+        model_ft.fc = nn.Sequential(*feature_model)
     else:
         if(args.net_type == 'alexnet' or args.net_type == 'vggnet'):
             num_ftrs = model_ft.classifier[6].in_features
