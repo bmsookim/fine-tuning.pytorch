@@ -75,9 +75,16 @@ checkpoint = torch.load('./checkpoint/'+trainset_dir+file_name+'.t7')
 model = checkpoint['model']
 
 print("| Consisting a feature extractor from the model...")
-feature_map = list(model.module.children())
-feature_map.pop()
-extractor = nn.Sequential(*feature_map)
+if(args.net_type == 'alexnet' or args.net_type == 'vggnet'):
+    feature_map = list(checkpoint['model'].module.classifier.children())
+    feature_map.pop()
+    new_classifier = nn.Sequential(*feature_map)
+    extractor = copy.deepcopy(checkpoint['model'])
+    extractor.module.classifier = new_classifier
+elif (args.net_type) == 'resnet'):
+    feature_map = list(model.module.children())
+    feature_map.pop()
+    extractor = nn.Sequential(*feature_map)
 
 if use_gpu:
     model.cuda()
