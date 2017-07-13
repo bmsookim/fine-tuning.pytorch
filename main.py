@@ -234,11 +234,12 @@ def train_model(model, criterion, optimizer, lr_scheduler, num_epochs=cf.num_epo
 
     return best_model
 
-def exp_lr_scheduler(optimizer, epoch, init_lr=args.lr, lr_decay_epoch=10):
-    lr = init_lr * (0.1**(epoch // lr_decay_epoch))
+def exp_lr_scheduler(optimizer, epoch, init_lr=args.lr, weight_decay=args.weight_decay, lr_decay_epoch=10):
+    lr = init_lr * (0.5**(epoch // lr_decay_epoch))
 
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
+        param_group['weight_decay'] = weight_decay
 
     return optimizer, lr
 
@@ -275,5 +276,5 @@ print(model_ft)
 
 if __name__ == "__main__":
     criterion = nn.CrossEntropyLoss()
-    optimizer_ft = optim.SGD(model_ft.parameters(), lr=args.lr, momentum=0.9)
+    optimizer_ft = optim.SGD(model_ft.parameters(), lr=args.lr, momentum=0.9, weight_decay=args.weight_decay)
     model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler, num_epochs=cf.num_epochs)
