@@ -66,19 +66,42 @@ python main.py --finetune --lr [:lr] --depth [:depth]
 python main.py --finetune --addlayer --lr [:lr] --depth [:depth]
 ```
 
-## Run various networks
+## Train various networks
 
 I have added fine-tuning & transfer learning script for alexnet, VGG(11, 13, 16, 19),
 ResNet(18, 34, 50, 101, 152).
 
-Please modify the [scripts](./scripts) and run the line below.
+Please modify the [scripts](./train) and run the line below.
 
 ```bash
 
-$ ./scripts/[:network].sh 
+$ ./train/[:network].sh 
 
 # For example, if you want to pretrain alexnet, just run
-$ ./scripts/alexnet.sh
+$ ./train/alexnet.sh
+
+```
+
+## Test (Inference) various networks
+
+For testing out your fine-tuned model on alexnet, VGG(11, 13, 16, 19), ResNet(18, 34, 50, 101, 152),
+
+Please modify the [scripts](./test) and run the line below.
+
+```bash
+
+$ ./test/[:network].sh
+
+```
+For example, if you have trained ResNet with 50 layers, first modify the [resnet test script](./test/resnet.sh)
+
+```bash
+$ vi ./test/resnet.sh
+
+
+
+
+$ ./test/resnet.sh
 
 ```
 
