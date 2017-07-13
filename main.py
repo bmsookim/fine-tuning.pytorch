@@ -58,7 +58,7 @@ data_transforms = {
 
 data_dir = cf.aug_base
 dataset_dir = cf.data_base.split("/")[-1] + os.sep
-print("| Preparing %s dataset..." %(cf.data_base.split("/")[-1]))
+print("| Preparing model trained on %s dataset..." %(cf.data_base.split("/")[-1]))
 dsets = {
     x : datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x])
     for x in ['train', 'val']
@@ -132,6 +132,7 @@ if (args.testOnly):
         num_workers=1
     )
 
+    print("\n[Phase 3 : Inference on %s]" %cf.test_dir)
     for batch_idx, (inputs, targets) in enumerate(testloader):#dset_loaders['val']):
         if use_gpu:
             inputs, targets = inputs.cuda(), targets.cuda()
@@ -147,7 +148,6 @@ if (args.testOnly):
         correct += predicted.eq(targets.data).cpu().sum()
 
     acc = 100.*correct/total
-    print("\n[Phase 3 : Inference]")
     print("| Test Result\tAcc@1 %.2f%%" %(acc))
 
     sys.exit(0)
