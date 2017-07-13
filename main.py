@@ -107,7 +107,6 @@ def softmax(x):
 
 # Test only option
 if (args.testOnly):
-    print('\n[Phase 3] : Test data Inference')
     print("| Loading checkpoint model for test phase...")
     assert os.path.isdir('checkpoint'), 'Error: No checkpoint directory found!'
     _, file_name = getNetwork(args)
@@ -148,7 +147,7 @@ if (args.testOnly):
         correct += predicted.eq(targets.data).cpu().sum()
 
     acc = 100.*correct/total
-    print("\n[Result Report]")
+    print("\n[Phase 3 : Inference]")
     print("| Test Result\tAcc@1 %.2f%%" %(acc))
 
     sys.exit(0)
