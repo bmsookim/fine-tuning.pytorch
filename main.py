@@ -29,9 +29,10 @@ from networks import *
 from torch.autograd import Variable
 
 parser = argparse.ArgumentParser(description='PyTorch Digital Mammography Training')
-parser.add_argument('--lr', default=1e-3, type=float, help='learning_rate')
+parser.add_argument('--lr', default=1e-3, type=float, help='learning rate')
 parser.add_argument('--net_type', default='resnet', type=str, help='model')
 parser.add_argument('--depth', default=50, type=int, help='depth of model')
+parser.add_argument('--weight_decay', deafult=5e-4, type=float, help='weight decay')
 parser.add_argument('--finetune', '-f', action='store_true', help='Fine tune pretrained model')
 parser.add_argument('--addlayer','-a',action='store_true', help='Add additional layer in fine-tuning')
 parser.add_argument('--resetClassifier', '-r', action='store_true', help='Reset classifier')

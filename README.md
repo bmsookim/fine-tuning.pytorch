@@ -1,6 +1,7 @@
 # Fine-Tuning
 Pytorch implementation of Fine-Tuning (Transfer Learning) CNN Networks.
 
+![alt_tag](./imgs/pytorch.jpg)
 ![alt_tag](./imgs/transfer-learning.jpeg)
 
 ## Fine-Tuning
@@ -86,6 +87,8 @@ $ ./train/alexnet.sh
 
 For testing out your fine-tuned model on alexnet, VGG(11, 13, 16, 19), ResNet(18, 34, 50, 101, 152),
 
+First, set your data directory as test_dir in [config.py](./config.py).
+
 Please modify the [scripts](./test) and run the line below.
 
 ```bash
@@ -98,8 +101,10 @@ For example, if you have trained ResNet with 50 layers, first modify the [resnet
 ```bash
 $ vi ./test/resnet.sh
 
-
-
+python main.py \
+    --net_type resnet \
+    --depth 50
+    --testOnly
 
 $ ./test/resnet.sh
 
