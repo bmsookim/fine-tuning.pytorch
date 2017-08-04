@@ -32,7 +32,7 @@ parser = argparse.ArgumentParser(description='PyTorch Digital Mammography Traini
 parser.add_argument('--lr', default=1e-3, type=float, help='learning rate')
 parser.add_argument('--net_type', default='resnet', type=str, help='model')
 parser.add_argument('--depth', default=50, type=int, help='depth of model')
-parser.add_argument('--weight_decay', deafult=5e-4, type=float, help='weight decay')
+parser.add_argument('--weight_decay', default=5e-4, type=float, help='weight decay')
 parser.add_argument('--finetune', '-f', action='store_true', help='Fine tune pretrained model')
 parser.add_argument('--addlayer','-a',action='store_true', help='Add additional layer in fine-tuning')
 parser.add_argument('--resetClassifier', '-r', action='store_true', help='Reset classifier')
@@ -50,7 +50,7 @@ data_transforms = {
         transforms.Normalize(cf.mean, cf.std)
     ]),
     'val': transforms.Compose([
-        transforms.Scale(224),
+        transforms.Scale(256),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize(cf.mean, cf.std)
@@ -254,7 +254,7 @@ if(args.resetClassifier):
         num_ftrs = model_ft.fc.in_features
         feature_model = list(model_ft.fc.children())
         feature_model.append(nn.Linear(num_ftrs, cf.feature_size))
-        feature_model.append(nn.BatchNormd1d(cf.feature_size))
+        feature_model.append(nn.BatchNorm1d(cf.feature_size))
         feature_model.append(nn.ReLU(inplace=True))
         feature_model.append(nn.Linear(cf.feature_size, len(dset_classes)))
         model_ft.fc = nn.Sequential(*feature_model)
