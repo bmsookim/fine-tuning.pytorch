@@ -7,7 +7,7 @@ name = 'FINAL_TRAIN_NEW_AUG'
 
 data_base = '/home/mnt/datasets/'+name
 aug_base = '/home/bumsoo/Data/split/'+name
-test_dir = '/home/bumsoo/Data/test/FINAL_TEST/'
+test_dir = '/home/bumsoo/Data/test/FINAL_TEST'
 
 # model option
 batch_size = 16

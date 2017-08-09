@@ -23,6 +23,7 @@ import copy
 import os
 import sys
 import argparse
+import csv
 
 from torchvision import datasets, models, transforms
 from networks import *
@@ -35,7 +36,6 @@ parser.add_argument('--net_type', default='resnet', type=str, help='model')
 parser.add_argument('--depth', default=50, type=int, help='depth of model')
 parser.add_argument('--finetune', '-f', action='store_true', help='Fine tune pretrained model')
 parser.add_argument('--addlayer','-a',action='store_true', help='Add additional layer in fine-tuning')
-parser.add_argument('--testOnly', '-t', action='store_true', help='Test mode with the saved model')
 args = parser.parse_args()
 
 # Phase 1 : Data Upload
@@ -95,21 +95,27 @@ test_transform = transforms.Compose([
     transforms.Normalize(cf.mean, cf.std)
 ])
 
-for subdir, dirs, files in os.walk(data_dir):
-    for f in files:
-        file_path = subdir + os.sep + f
-        if (is_image(f)):
-            image = Image.open(file_path).convert('RGB')
-            if test_transform is not None:
-                image = test_transform(image)
-            inputs = image
-            inputs = Variable(inputs, volatile=True)
-            if use_gpu:
-                inputs = inputs.cuda()
-            inputs = inputs.view(1, inputs.size(0), inputs.size(1), inputs.size(2)) # add batch dim in the front
+output_file = "result_"+cf.test_dir.split("/")[-1]+".csv"
 
-            outputs = model(inputs)
-            softmax_res = softmax(outputs.data.cpu().numpy()[0])
-            score = softmax_res[1]
+with open(output_file, 'wb') as csvfile:
+    fields = ['file_name', 'score']
+    writer = csv.DictWriter(csvfile, fieldnames=fields)
+    for subdir, dirs, files in os.walk(data_dir):
+        for f in files:
+            file_path = subdir + os.sep + f
+            if (is_image(f)):
+                image = Image.open(file_path).convert('RGB')
+                if test_transform is not None:
+                    image = test_transform(image)
+                inputs = image
+                inputs = Variable(inputs, volatile=True)
+                if use_gpu:
+                    inputs = inputs.cuda()
+                inputs = inputs.view(1, inputs.size(0), inputs.size(1), inputs.size(2)) # add batch dim in the front
 
-            print(file_path + "," + str(score))
+                outputs = model(inputs)
+                softmax_res = softmax(outputs.data.cpu().numpy()[0])
+                score = softmax_res[1]
+
+                print(file_path + "," + str(score))
+                writer.writerow({'file_name': file_path, 'score':score})
