@@ -1,9 +1,9 @@
 # ************************************************************
 # Author : Bumsoo Kim, 2017
-# Github : https://github.com/meliketoy/pytorch-mammo
+# Github : https://github.com/meliketoy/fine-tuning.pytorch
 #
 # Korea University, Data-Mining Lab
-# Digital Mammogram Mass classification implementation
+# Deep Convolutional Network Fine tuning Implementation
 #
 # Description : main.py
 # The main code for training classification networks.
