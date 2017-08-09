@@ -1,4 +1,4 @@
 python main.py \
     --net_type resnet \
-    --depth 18 \
+    --depth 152 \
     --testOnly

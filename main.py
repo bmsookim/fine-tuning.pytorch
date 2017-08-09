@@ -111,7 +111,7 @@ if (args.testOnly):
     print("| Loading checkpoint model for test phase...")
     assert os.path.isdir('checkpoint'), 'Error: No checkpoint directory found!'
     _, file_name = getNetwork(args)
-    checkpoint = torch.load('./checkpoint/'+file_name+'.t7')
+    checkpoint = torch.load('./checkpoint/'+dataset_dir+'/'+file_name+'.t7')
     model = checkpoint['model']
 
     if use_gpu:
@@ -142,7 +142,6 @@ if (args.testOnly):
 
         # print(outputs.data.cpu().numpy()[0])
         softmax_res = softmax(outputs.data.cpu().numpy()[0])
-        print(softmax_res[1])
 
         _, predicted = torch.max(outputs.data, 1)
         total += targets.size(0)
@@ -273,8 +272,6 @@ if use_gpu:
     model_ft = model_ft.cuda()
     model_ft = torch.nn.DataParallel(model_ft, device_ids=range(torch.cuda.device_count()))
     cudnn.benchmark = True
-
-print(model_ft)
 
 if __name__ == "__main__":
     criterion = nn.CrossEntropyLoss()
