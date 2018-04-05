@@ -1,7 +1,10 @@
 <p align="center"><img width="40%" src="./imgs/pytorch.png"></p>
 
-# Fine-Tuning
+# fine-tuning.pytorch
 Pytorch implementation of Fine-Tuning (Transfer Learning) CNN Networks.
+This project is made by Bumsoo Kim.
+
+Korea University, Master-Ph.D intergrated Course.
 <p align="center"><img width="40%" src="./imgs/transfer-learning.jpeg"></p>
 
 
