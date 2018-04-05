@@ -36,11 +36,13 @@ parser.add_argument('--net_type', default='resnet', type=str, help='model')
 parser.add_argument('--depth', default=50, type=int, help='depth of model')
 parser.add_argument('--finetune', '-f', action='store_true', help='Fine tune pretrained model')
 parser.add_argument('--addlayer','-a',action='store_true', help='Add additional layer in fine-tuning')
+parser.add_argument('--path', default=cf.test_dir, type=str, help='inference path')
 args = parser.parse_args()
 
 # Phase 1 : Data Upload
 print('\n[Phase 1] : Data Preperation')
 
+cf.test_dir = args.path
 data_dir = cf.test_dir
 trainset_dir = cf.data_base.split("/")[-1] + os.sep
 print("| Preparing %s dataset..." %(cf.test_dir.split("/")[-1]))
@@ -51,9 +53,16 @@ use_gpu = torch.cuda.is_available()
 print('\n[Phase 2] : Model setup')
 
 def getNetwork(args):
-    if (args.net_type == 'vggnet'):
-        net = VGG(args.finetune, args.depth)
+    if (args.net_type == 'alexnet'):
+        net = models.alexnet(pretrained=args.finetune)
+        file_name = 'alexnet'
+    elif (args.net_type == 'vggnet'):
+        if(args.depth == 16):
+            net = models.vgg16(pretrained=args.finetune)
         file_name = 'vgg-%s' %(args.depth)
+    elif (args.net_type == 'inception'):
+        net = models.inception(pretrained=args.finetune)
+        file_name = 'inceptino-v3'
     elif (args.net_type == 'resnet'):
         net = resnet(args.finetune, args.depth)
         file_name = 'resnet-%s' %(args.depth)
@@ -89,13 +98,16 @@ def is_image(f):
     return f.endswith(".png") or f.endswith(".jpg")
 
 test_transform = transforms.Compose([
-    transforms.Scale(256),
+    transforms.Scale(224),
     transforms.CenterCrop(224),
     transforms.ToTensor(),
     transforms.Normalize(cf.mean, cf.std)
 ])
 
-output_file = "result_"+cf.test_dir.split("/")[-1]+".csv"
+if not os.path.isdir('result'):
+    os.mkdir('result')
+
+output_file = "./result/"+cf.test_dir.split("/")[-1]+".csv"
 
 with open(output_file, 'wb') as csvfile:
     fields = ['file_name', 'score']

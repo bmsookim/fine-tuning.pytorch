@@ -1,7 +1,7 @@
 python main.py \
-    --lr 1e-2 \
-    --weight_decay 1e-4 \
+    --lr 1e-3 \
+    --weight_decay 5e-4 \
     --net_type vggnet \
-    --depth 19 \
+    --depth 16 \
     --resetClassifier \
     --finetune

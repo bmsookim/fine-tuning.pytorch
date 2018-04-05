@@ -50,7 +50,7 @@ data_transforms = {
         transforms.Normalize(cf.mean, cf.std)
     ]),
     'val': transforms.Compose([
-        transforms.Scale(256),
+        transforms.Scale(224),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize(cf.mean, cf.std)
@@ -94,11 +94,14 @@ def getNetwork(args):
             print('Error : VGGnet should have depth of either [11, 13, 16, 19]')
             sys.exit(1)
         file_name = 'vgg-%s' %(args.depth)
+    elif (args.net_type == 'squeezenet'):
+        net = models.squeezenet1_0(pretrained=args.finetune)
+        file_name = 'squeeze'
     elif (args.net_type == 'resnet'):
         net = resnet(args.finetune, args.depth)
         file_name = 'resnet-%s' %(args.depth)
     else:
-        print('Error : Network should be either [alexnet / vggnet / resnet]')
+        print('Error : Network should be either [alexnet / squeezenet / vggnet / resnet]')
         sys.exit(1)
 
     return net, file_name
@@ -111,6 +114,7 @@ if (args.testOnly):
     print("| Loading checkpoint model for test phase...")
     assert os.path.isdir('checkpoint'), 'Error: No checkpoint directory found!'
     _, file_name = getNetwork(args)
+    print('| Loading '+file_name+".t7...")
     checkpoint = torch.load('./checkpoint/'+dataset_dir+'/'+file_name+'.t7')
     model = checkpoint['model']
 
@@ -213,7 +217,7 @@ def train_model(model, criterion, optimizer, lr_scheduler, num_epochs=cf.num_epo
                 print('\n| Validation Epoch #%d\t\t\tLoss %.4f\tAcc %.2f%%'
                     %(epoch+1, loss.data[0], 100.*epoch_acc))
 
-                if epoch_acc > best_acc:
+                if epoch_acc > best_acc :#and epoch > 80:
                     print('| Saving Best model...\t\t\tTop1 %.2f%%' %(100.*epoch_acc))
                     best_acc = epoch_acc
                     best_model = copy.deepcopy(model)
@@ -235,7 +239,7 @@ def train_model(model, criterion, optimizer, lr_scheduler, num_epochs=cf.num_epo
 
     return best_model
 
-def exp_lr_scheduler(optimizer, epoch, init_lr=args.lr, weight_decay=args.weight_decay, lr_decay_epoch=10):
+def exp_lr_scheduler(optimizer, epoch, init_lr=args.lr, weight_decay=args.weight_decay, lr_decay_epoch=cf.lr_decay_epoch):
     lr = init_lr * (0.5**(epoch // lr_decay_epoch))
 
     for param_group in optimizer.param_groups:

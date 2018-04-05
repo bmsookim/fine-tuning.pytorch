@@ -1,4 +1,4 @@
 python main.py \
     --net_type vggnet \
-    --depth 19 \
+    --depth 16 \
     --testOnly
