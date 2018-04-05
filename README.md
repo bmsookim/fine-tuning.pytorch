@@ -1,11 +1,9 @@
 <p align="center"><img width="40%" src="./imgs/pytorch.png"></p>
--------------------------------------------------------------------------
 
 # Fine-Tuning
 Pytorch implementation of Fine-Tuning (Transfer Learning) CNN Networks.
+<p align="center"><img width="40%" src="./imgs/transfer-learning.jpeg"></p>
 
-![alt_tag](./imgs/pytorch.jpg)
-![alt_tag](./imgs/transfer-learning.jpeg)
 
 ## Fine-Tuning
 In practice, very few people train an entire Convolutional Network from scratch (with random initialization), because it is relatively rare to have a dataset of sufficient size. Instead, it is common to pretrain a ConvNet on a very large dataset (e.g. ImageNet, which contains 1.2 million images with 1000 categories), and then use the ConvNet either as an initialization or a fixed feature extractor for the task of interest.
