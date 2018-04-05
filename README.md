@@ -1,3 +1,6 @@
+<p align="center"><img width="40%" src="./imgs/pytorch.png"></p>
+-------------------------------------------------------------------------
+
 # Fine-Tuning
 Pytorch implementation of Fine-Tuning (Transfer Learning) CNN Networks.
 
