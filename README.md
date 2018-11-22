@@ -18,11 +18,19 @@ See the [installation instruction](INSTALL.md) for a step-by-step installation g
 See the [server instruction](SERVER.md) for server settup.
 - Install [cuda-8.0](https://developer.nvidia.com/cuda-downloads)
 - Install [cudnn v5.1](https://developer.nvidia.com/cudnn)
-- Download [Pytorch for python-2.7](https://pytorch.org) and clone the repository.
+- Download [PyTorch for python-2.7](https://pytorch.org) and clone the repository.
+- Download [PyTorch-3.5](https://pytorch.org) for using further pretrained libraries with anaconda3.
 ```bash
 pip install http://download.pytorch.org/whl/cu80/torch-0.1.12.post2-cp27-none-linux_x86_64.whl
 pip install torchvision
 git clone https://github.com/meliketoy/resnet-fine-tuning.pytorch
+```
+
+- Download Pretrained models for PyTorch (Only for 3.5)
+```bash
+$ git clone https://github.com/Cadene/pretrained-models.pytorch.git
+$ pretrained-models.pytorch
+$ python setup.py install
 ```
 
 ## Basic Setups

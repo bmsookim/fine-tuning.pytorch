@@ -23,6 +23,7 @@ import copy
 import os
 import sys
 import argparse
+import pretrainedmodels # exclude this for python2.7 users
 
 from torchvision import datasets, models, transforms
 from networks import *
@@ -42,20 +43,38 @@ args = parser.parse_args()
 # Phase 1 : Data Upload
 print('\n[Phase 1] : Data Preperation')
 
-data_transforms = {
-    'train': transforms.Compose([
-        transforms.RandomSizedCrop(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(cf.mean, cf.std)
-    ]),
-    'val': transforms.Compose([
-        transforms.Scale(224),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(cf.mean, cf.std)
-    ]),
-}
+if args.net_type == 'inception' or args.net_type == 'xception':
+    data_transforms = {
+        'train': transforms.Compose([
+            transforms.Scale(320),
+            transforms.RandomSizedCrop(299),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize(cf.mean, cf.std)
+        ]),
+        'val': transforms.Compose([
+            transforms.Scale(320),
+            transforms.CenterCrop(299),
+            transforms.ToTensor(),
+            transforms.Normalize(cf.mean, cf.std)
+        ]),
+    }
+else:
+    data_transforms = {
+        'train': transforms.Compose([
+            transforms.Scale(256),
+            transforms.RandomSizedCrop(224),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize(cf.mean, cf.std)
+        ]),
+        'val': transforms.Compose([
+            transforms.Scale(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize(cf.mean, cf.std)
+        ]),
+    }
 
 data_dir = cf.aug_base
 dataset_dir = cf.data_base.split("/")[-1] + os.sep
@@ -100,6 +119,12 @@ def getNetwork(args):
     elif (args.net_type == 'resnet'):
         net = resnet(args.finetune, args.depth)
         file_name = 'resnet-%s' %(args.depth)
+    elif (args.net_type == 'inception'):
+        net = pretrainedmodels.inceptionv3(num_classes=1000, pretrained='imagenet')
+        file_name = 'inception-v3'
+    elif (args.net_type == 'xception'):
+        net = pretrainedmodels.xception(num_classes=1000, pretrained='imagenet')
+        file_name = 'xception'
     else:
         print('Error : Network should be either [alexnet / squeezenet / vggnet / resnet]')
         sys.exit(1)
@@ -189,8 +214,14 @@ def train_model(model, criterion, optimizer, lr_scheduler, num_epochs=cf.num_epo
 
                 # Forward Propagation
                 outputs = model(inputs)
+                if isinstance(outputs, tuple):
+                    loss = sum((criterion(o, labels) for o in outputs))
+                else:
+                    loss = criterion(outputs, labels)
+                if isinstance(outputs, tuple):
+                    # inception v3 output will be (x, aux)
+                    outputs = outputs[0]
                 _, preds = torch.max(outputs.data, 1)
-                loss = criterion(outputs, labels)
 
                 # Backward Propagation
                 if phase == 'train':
@@ -271,6 +302,9 @@ if(args.resetClassifier):
         elif(args.net_type == 'resnet'):
             num_ftrs = model_ft.fc.in_features
             model_ft.fc = nn.Linear(num_ftrs, len(dset_classes))
+        elif(args.net_type == 'inception' or args.net_type == 'xception'):
+            num_ftrs = model_ft.last_linear.in_features
+            model_ft.last_linear = nn.Linear(num_ftrs, len(dset_classes))
 
 if use_gpu:
     model_ft = model_ft.cuda()
